@@ -1,0 +1,690 @@
+{
+  "name": "ImapBillExtractor",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "=attachment_0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        -304
+      ],
+      "id": "4e69a0a1-b64e-49da-a69f-4f050979bcdc",
+      "name": "Extract from File",
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract invoice data from the invoice text.\n\nReturn exactly one valid JSON object.\nNo Markdown.\nNo code block.\nNo explanation.\nNo comments.\n\nUse exactly this structure:\n{\n  \"processed_at\": null,\n  \"vendor_id\": null,\n  \"vendor_name\": null,\n  \"invoice_number\": null,\n  \"invoice_date\": null,\n  \"customer_number\": null,\n  \"order_number\": null,\n  \"gross_amount\": null,\n  \"net_amount\": null,\n  \"vat_amount\": null,\n  \"currency\": null,\n  \"payment_method\": null,\n  \"iban\": null,\n  \"source_filename\": null,\n  \"status\": \"processed\",\n  \"parser\": \"llm\",\n  \"source_confidence\": null,\n  \"raw_text\": null\n}\n\nRules:\n- Missing values: null\n- Dates: YYYY-MM-DD\n- Amounts: numbers, not strings\n- Use dot as decimal separator\n- Currency: ISO code\n- raw_text must always be null\n\nInvoice text:\n{{ $json.raw_text }}",
+        "messages": {
+          "messageValues": []
+        },
+        "batching": {
+          "batchSize": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1472,
+        -432
+      ],
+      "id": "c64534de-5ca4-4a6f-b1d8-3e2b6240bd5e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "qwen3:32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        1728,
+        -624
+      ],
+      "id": "ef6ec4b5-a5f5-4781-b3bc-fafa81f5fe53",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "cCkdl1tJrJhPNBnO",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "coreImapAccount",
+        "resource": "email",
+        "operation": "moveEmail",
+        "sourceMailbox": {
+          "__rl": true,
+          "value": "INBOX.it-4.bill_temp",
+          "mode": "path"
+        },
+        "emailUid": "={{ $('GetEmailsList email').item.json.uid }}",
+        "destinationMailbox": {
+          "__rl": true,
+          "value": "INBOX.it-4.bill_processed",
+          "mode": "path"
+        }
+      },
+      "type": "n8n-nodes-imap.imap",
+      "typeVersion": 1,
+      "position": [
+        2720,
+        -240
+      ],
+      "id": "c926cb32-6f20-4461-a33b-1498c0f06560",
+      "name": "MoveEmail email",
+      "credentials": {
+        "imap": {
+          "id": "J62wLb783UoMClAu",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "moXqIUvcjcuCOhHD",
+          "mode": "list",
+          "cachedResultName": "bill",
+          "cachedResultUrl": "/projects/1Z5jlCTto9buZhBx/datatables/moXqIUvcjcuCOhHD"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "processed_at",
+              "displayName": "processed_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "vendor_id",
+              "displayName": "vendor_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "vendor_name",
+              "displayName": "vendor_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "invoice_date",
+              "displayName": "invoice_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "customer_number",
+              "displayName": "customer_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "order_number",
+              "displayName": "order_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "invoice_number",
+              "displayName": "invoice_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "gross_amount",
+              "displayName": "gross_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "net_amount",
+              "displayName": "net_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "vat_amount",
+              "displayName": "vat_amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "payment_method",
+              "displayName": "payment_method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "iban",
+              "displayName": "iban",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "source_filename",
+              "displayName": "source_filename",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "parser",
+              "displayName": "parser",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "source_confidence",
+              "displayName": "source_confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "validation_error",
+              "displayName": "validation_error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "raw_text",
+              "displayName": "raw_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2048,
+        -304
+      ],
+      "id": "fdb6e6e3-6656-4b06-8f7f-b06497a8f7ef",
+      "name": "Insert row"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const text = $json.text || $json.raw_text || \"\";\n\n/**\n * -----------------------------\n * Helpers\n * -----------------------------\n */\n\nfunction matchRule(pattern) {\n  if (!pattern) return null;\n  const match = text.match(pattern);\n  return match ? match[1]?.trim() : null;\n}\n\nfunction parseAmount(value) {\n  if (!value) return null;\n\n  const cleaned = String(value)\n    .replace(/\\s/g, \"\")\n    .replace(/\\./g, \"\")\n    .replace(\",\", \".\")\n    .replace(/[^\\d.-]/g, \"\");\n\n  const number = Number(cleaned);\n  return Number.isFinite(number) ? number : null;\n}\n\nfunction toIsoDate(value) {\n  if (!value) return null;\n\n  const match = String(value).match(/([0-9]{1,2})[.\\-/]([0-9]{1,2})[.\\-/]([0-9]{2,4})/);\n  if (!match) return value;\n\n  let [, d, m, y] = match;\n  if (y.length === 2) y = `20${y}`;\n\n  return `${y.padStart(4, \"0\")}-${m.padStart(2, \"0\")}-${d.padStart(2, \"0\")}`;\n}\n\nfunction normalizeIban(value) {\n  if (!value) return null;\n\n  const iban = value.replace(/\\s+/g, \"\").toUpperCase();\n\n  // Ignore masked IBANs\n  if (iban.includes(\"*\") || iban.includes(\"X\")) return null;\n\n  return iban;\n}\n\nfunction round2(value) {\n  if (value === null || value === undefined) return null;\n  return Math.round(value * 100) / 100;\n}\n\n/**\n * -----------------------------\n * Vendor-specific extractors\n * -----------------------------\n */\n\nfunction extract1und1Amounts(text) {\n  const grossMatch = text.match(/(?:Zu zahlender Betrag|Auszuzahlender Betrag)\\s+([0-9.,]+)\\s+EUR/i);\n  const vatRateMatch = text.match(/Mehrwertsteuer\\s*\\(([0-9.,]+)%\\)/i);\n\n  const amountBlockMatch = text.match(\n    /Zwischensumme\\s+Netto\\s*\\n?\\+?\\s*Mehrwertsteuer\\s*\\([0-9.,]+%\\)\\s*\\n?\\s*(-?[0-9.,]+)\\s+EUR\\s*\\n?\\s*(-?[0-9.,]+)\\s+EUR/i\n  );\n\n  let gross = parseAmount(grossMatch?.[1]);\n  let net = parseAmount(amountBlockMatch?.[1]);\n  let vat = parseAmount(amountBlockMatch?.[2]);\n  const vatRate = parseAmount(vatRateMatch?.[1]);\n\n  // Repair if extraction failed or VAT is implausible\n  if (gross !== null && vatRate !== null) {\n    const expectedNet = round2(gross / (1 + vatRate / 100));\n    const expectedVat = round2(gross - expectedNet);\n\n    const sumInvalid =\n      net === null ||\n      vat === null ||\n      Math.abs(gross - (net + vat)) > 0.05;\n\n    const vatTooHigh =\n      vat !== null &&\n      gross !== null &&\n      Math.abs(vat / gross) > 0.3;\n\n    if (sumInvalid || vatTooHigh) {\n      net = expectedNet;\n      vat = expectedVat;\n    }\n  }\n\n  return {\n    gross_amount: gross,\n    net_amount: net,\n    vat_amount: vat\n  };\n}\n\nfunction applyVendorSpecificLogic(result, vendorId) {\n  switch (vendorId) {\n    case \"1und1\": {\n      Object.assign(result, extract1und1Amounts(text));\n\n      result.payment_method = /SEPA-Lastschriftmandat|buchen wir den Rechnungsbetrag/i.test(text)\n        ? \"SEPA-Lastschrift\"\n        : /gutschreiben|schreiben wir Ihnen.*gut|Gutschrift/i.test(text)\n          ? \"Gutschrift\"\n          : result.payment_method;\n\n      result.iban = null;\n      break;\n    }\n\n    default:\n      break;\n  }\n\n  return result;\n}\n\n/**\n * -----------------------------\n * Vendor definitions\n * -----------------------------\n */\n\nconst vendors = [\n  {\n    id: \"1und1\",\n    name: \"1&1 Telecom GmbH\",\n    detect: /1\\s*&\\s*1\\s+Telecom|1und1|1&1/i,\n    rules: {\n      invoice_number: /Rechnungsnummer:?\\s+([0-9]+)/i,\n      invoice_date: /Rechnungsdatum:?\\s+([0-9]{2}\\.[0-9]{2}\\.[0-9]{4})/i,\n      customer_number: /Kundennummer:?\\s+([A-Z]?\\d{6,})/i,\n      order_number: /(?:Vertragsnummer|Vertrag):?\\s+([0-9]+)/i,\n      gross_amount: /(?:Zu zahlender Betrag|Auszuzahlender Betrag)\\s+([0-9.,]+)\\s+EUR/i,\n      payment_method: /(SEPA-Lastschrift|Gutschrift|gutschreiben|schreiben wir Ihnen.*gut)/i,\n      iban: null\n    }\n  },\n  {\n    id: \"juwelier_bektas\",\n    name: \"Juwelier Bektas e.K.\",\n    detect: /juwelier\\s+bektas|bektas\\.de|DE118210739/i,\n    rules: {\n      invoice_number: /Rechnungs-Nr\\.\\s*([A-Z]{2}-\\d+)/i,\n      invoice_date: /Rechnungsdatum\\s*([0-9]{2}\\.[0-9]{2}\\.[0-9]{4})/i,\n      order_number: /Auftragsnummer\\s*(\\d+)/i,\n      customer_number: /Kundennummer\\s*(\\d+)/i,\n      payment_method: /Zahlungsart\\s*([A-Za-zÄÖÜäöüß ]+)/i,\n      net_amount: /Zwischensumme\\s*([0-9.,]+)\\s*EUR/i,\n      vat_amount: /MwSt\\.\\s*\\(19,00\\s*%\\)\\s*([0-9.,]+)\\s*EUR/i,\n      gross_amount: /Rechnungssumme\\s*([0-9.,]+)\\s*EUR/i,\n      iban: /IBAN:\\s*([A-Z]{2}[0-9A-Z]+)/i\n    }\n  },\n  {\n    id: \"cyberport\",\n    name: \"Cyberport\",\n    detect: /Cyberport SE|www\\.cyberport\\.de|cyberport/i,\n    rules: {\n      invoice_number: /Rechnungsnr\\.?\\/?-datum\\s+([0-9]+)/i,\n      invoice_date: /Rechnungsnr\\.?\\/?-datum\\s+[0-9]+\\s*\\/\\s*([0-9]{2}\\.[0-9]{2}\\.[0-9]{4})/i,\n      customer_number: /Kunde\\s+([0-9]+)/i,\n      order_number: /Bestellnr\\.?\\/?-datum\\s+([0-9]+)/i,\n      gross_amount: /Gesamtbetrag\\s+([0-9.,]+)\\s+EUR/i,\n      net_amount: /Nettobetrag\\s+EUR\\s+([0-9.,]+)\\s+EUR/i,\n      vat_amount: /Umsatzsteuer\\s+[0-9.,]+%\\s+auf\\s+[0-9.,]+\\s+EUR\\s+([0-9.,]+)\\s+EUR/i,\n      iban: /IBAN:\\s*([A-Z]{2}\\s*[0-9]{2}(?:\\s*[0-9A-Z]{4}){4}\\s*[0-9A-Z]{2})/i\n    }\n  },\n  {\n    id: \"hetzner\",\n    name: \"Hetzner Online GmbH\",\n    detect: /hetzner/i,\n    rules: {\n      invoice_number: /Rechnungsnummer\\s*[:#]?\\s*([A-Z0-9\\-\\/]+)/i,\n      invoice_date: /Rechnungsdatum\\s*[:#]?\\s*([0-9]{2}\\.[0-9]{2}\\.[0-9]{4})/i,\n      customer_number: /Kundennummer\\s*[:#]?\\s*([A-Z0-9\\-\\/]+)/i,\n      gross_amount: /Summe\\s+[\\s\\S]*?([0-9.,]+)\\s*€/i,\n      net_amount: /Summe\\s+([0-9.,]+)\\s*€\\s+[0-9.,]+\\s*€/i,\n      vat_amount: /Summe\\s+[0-9.,]+\\s*€\\s+([0-9.,]+)\\s*€/i,\n      payment_method: /Der Betrag wird .*? abgebucht/i,\n      iban: /IBAN:\\s*([A-Z]{2}[0-9A-Z*X\\s]+)/i\n    }\n  },\n  {\n    id: \"check24\",\n    name: \"CHECK24\",\n    detect: /check24/i,\n    rules: {\n      invoice_number: /Rechnung(?:snummer)?\\s*[:#]?\\s*([A-Z0-9\\-\\/]+)/i,\n      invoice_date: /Datum\\s*[:#]?\\s*([0-9]{2}\\.[0-9]{2}\\.[0-9]{4})/i,\n      gross_amount: /Gesamt(?:betrag)?\\s*[: ]+\\s*([0-9.,]+)\\s*€/i\n    }\n  }\n];\n\n/**\n * -----------------------------\n * Generic rules\n * -----------------------------\n */\n\nconst genericRules = {\n  invoice_number: /(?:Rechnungsnummer|Rechnung Nr\\.?|Invoice Number|Invoice No\\.?)\\s*[:#]?\\s*([A-Z0-9\\-\\/]+)/i,\n  invoice_date: /(?:Rechnungsdatum|Invoice Date|Datum)\\s*[:#]?\\s*([0-9]{1,2}[.\\-/][0-9]{1,2}[.\\-/][0-9]{2,4})/i,\n  customer_number: /(?:Kundennummer|Kunde|Customer Number|Customer No\\.?)\\s*[:#]?\\s*([A-Z0-9\\-\\/]+)/i,\n  order_number: /(?:Bestellnummer|Bestellnr\\.?|Auftragsnummer|Order Number|Order No\\.?)\\s*[:#]?\\s*([A-Z0-9\\-\\/]+)/i,\n  gross_amount: /(?:Gesamtbetrag|Bruttobetrag|Rechnungssumme|Total|Amount Due)\\s*[: ]+\\s*([0-9.,]+)\\s*€?/i,\n  vat_amount: /(?:MwSt|USt|Umsatzsteuer|VAT).*?([0-9.,]+)\\s*€?/i,\n  net_amount: /(?:Nettobetrag|Netto|Net Amount|Subtotal|Zwischensumme)\\s*[: ]+\\s*([0-9.,]+)\\s*€?/i,\n  iban: /(DE[0-9]{2}\\s?(?:[0-9A-Z]{4}\\s?){4}[0-9A-Z]{2})/i\n};\n\n/**\n * -----------------------------\n * Main parser\n * -----------------------------\n */\n\nconst vendor = vendors.find(v => v.detect.test(text));\n\nconst rules = {\n  ...genericRules,\n  ...(vendor?.rules || {})\n};\n\nlet result = {\n  processed_at: new Date().toISOString(),\n  vendor_id: vendor?.id || \"generic\",\n  vendor_name: vendor?.name || null,\n  invoice_number: matchRule(rules.invoice_number),\n  invoice_date: toIsoDate(matchRule(rules.invoice_date)),\n  customer_number: matchRule(rules.customer_number),\n  order_number: matchRule(rules.order_number),\n  currency: \"EUR\",\n  net_amount: parseAmount(matchRule(rules.net_amount)),\n  vat_amount: parseAmount(matchRule(rules.vat_amount)),\n  gross_amount: parseAmount(matchRule(rules.gross_amount)),\n  payment_method: matchRule(rules.payment_method),\n  iban: normalizeIban(matchRule(rules.iban)),\n  source_filename: $json.source_filename || $json.fileName || null,\n  status: \"processed\",\n  parser: vendor ? \"vendor_rule_based\" : \"generic_rule_based\",\n  source_confidence: 0,\n  validation_error: null,\n  raw_text: text\n};\n\nresult = applyVendorSpecificLogic(result, result.vendor_id);\n\n/**\n * -----------------------------\n * Validation\n * -----------------------------\n */\n\nlet validationErrors = [];\n\nif (\n  result.gross_amount !== null &&\n  result.net_amount !== null &&\n  result.vat_amount !== null\n) {\n  const diff = Math.abs(result.gross_amount - (result.net_amount + result.vat_amount));\n\n  if (diff > 0.05) {\n    validationErrors.push(\"gross_amount does not equal net_amount + vat_amount\");\n  }\n}\n\nif (\n  result.vat_amount !== null &&\n  result.gross_amount !== null &&\n  Math.abs(result.vat_amount / result.gross_amount) > 0.3\n) {\n  validationErrors.push(\"VAT amount is unusually high\");\n}\n\nif (validationErrors.length > 0) {\n  result.validation_error = validationErrors.join(\"; \");\n  result.status = \"needs_review\";\n}\n\n/**\n * -----------------------------\n * Confidence scoring\n * -----------------------------\n */\n\nlet confidence = 0;\n\nif (result.vendor_name) confidence += 10;\nif (result.invoice_number) confidence += 25;\nif (result.invoice_date) confidence += 20;\nif (result.gross_amount !== null) confidence += 25;\nif (result.vat_amount !== null) confidence += 10;\nif (result.net_amount !== null) confidence += 10;\nif (result.customer_number) confidence += 5;\nif (result.order_number) confidence += 5;\n\nif (vendor) confidence += 10;\nif (validationErrors.length > 0) confidence -= 30;\n\nresult.source_confidence = Math.max(0, Math.min(100, confidence));\n\nreturn { json: result };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        -304
+      ],
+      "id": "2e242c4e-0198-4134-bd73-33c743e27470",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "authentication": "coreImapAccount",
+        "resource": "email",
+        "operation": "downloadAttachment",
+        "mailboxPath": {
+          "__rl": true,
+          "value": "INBOX.it-4.bill_temp",
+          "mode": "path"
+        },
+        "emailUid": "={{ $json.uid }}",
+        "allAttachments": true
+      },
+      "type": "n8n-nodes-imap.imap",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -304
+      ],
+      "id": "8985515a-7115-4d4f-9654-faea23f90bcc",
+      "name": "DownloadAttachment",
+      "credentials": {
+        "imap": {
+          "id": "J62wLb783UoMClAu",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "feea81dc-fce4-4ada-ac92-f12b0980ea9f",
+              "leftValue": "={{ $json.source_confidence }}",
+              "rightValue": 65,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        -304
+      ],
+      "id": "0eaa3b4c-a14f-4a6c-b85a-775e26035086",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -240
+      ],
+      "id": "2a754ed8-132e-41f1-be88-3215c3bfacf5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "authentication": "coreImapAccount",
+        "resource": "email",
+        "mailboxPath": {
+          "__rl": true,
+          "value": "INBOX.it-4.bill_temp",
+          "mode": "path"
+        },
+        "emailDateRange": {
+          "since": ""
+        },
+        "emailFlags": {},
+        "emailSearchFilters": {}
+      },
+      "type": "n8n-nodes-imap.imap",
+      "typeVersion": 1,
+      "position": [
+        128,
+        -240
+      ],
+      "id": "007015f8-6ab7-4089-bcd9-923a78529e17",
+      "name": "GetEmailsList email",
+      "credentials": {
+        "imap": {
+          "id": "J62wLb783UoMClAu",
+          "name": "IMAP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        352,
+        -240
+      ],
+      "id": "43b3dfcc-169b-435d-a4cd-4788b1ac3c37",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.file_path }}",
+        "dataPropertyName": "={{ $('DownloadAttachment').item.binary.attachment_0 }}",
+        "options": {
+          "append": false
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        2496,
+        -304
+      ],
+      "id": "366cd881-2948-47e0-939e-97bc7a070f69",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const date = $json.invoice_date;\n\nif (date) {\n  const [day, month, year] = date.split('.');\n  $json.invoice_date = `${year}-${month}-${day}`;\n}\n\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        -176
+      ],
+      "id": "7dc5d139-3ad9-4740-9dbc-c15c4264ed6e",
+      "name": "Date handler"
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($input.first().json.text)\n\nif (parsed.iban && parsed.iban.includes(\"*\")) {\n  parsed.iban = null;\n}\n\nreturn [{\n  json: {\n    ...parsed,\n    processed_at: parsed.processed_at || new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        -432
+      ],
+      "id": "c2fac2c9-ba12-43be-934b-f59e68cb5415",
+      "name": "Json hierarchy flatten"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const date = new Date($json.invoice_date);\n\nconst year = date.getFullYear();\nconst month = String(date.getMonth() + 1).padStart(2, '0');\nconst day = String(date.getDate()).padStart(2, '0');\n\nconst filename =\n  `${year}-${month}-${day}_` +\n  `${$json.invoice_number}.pdf`\n    .replace(/[^\\w.-]/g, \"_\");\n\n$json.file_path =\n  `/opt/n8n/.n8n/invoices/${year}/${month}/${filename}`;\n\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        -304
+      ],
+      "id": "8b31615b-59eb-4644-9d90-f5e505fcdc8c",
+      "name": "Date extractor"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MoveEmail email": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Json hierarchy flatten",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert row": {
+      "main": [
+        [
+          {
+            "node": "Date extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DownloadAttachment": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Date handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "GetEmailsList email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetEmailsList email": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "DownloadAttachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "MoveEmail email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date handler": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Json hierarchy flatten": {
+      "main": [
+        [
+          {
+            "node": "Insert row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date extractor": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e6234ea1-b247-478e-9f2c-829692d4e2b6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "264da8d713812637c84fe39d5d2847b466fb0365c3cec330bf4b61b8cffe7813"
+  },
+  "nodeGroups": [],
+  "id": "oNrBz0MZCTfKIJqz",
+  "tags": []
+}
